@@ -1,0 +1,35 @@
+# Mac
+
+docker run --rm -it \
+    -p 2181:2181 -p 3030:3030 -p 8081:8081 \
+    -p 8082:8082 -p 8083:8083 -p 9092:9092 \
+    -e ADV_HOST=127.0.0.1 \
+    landoop/fast-data-dev
+
+docker run --rm -it --net=host landoop/fast-data-dev bash
+
+# Create Topic
+kafka-topics --create --topic first_topic --partitions 3 --replication-factor 1 --zookeeper 127.0.0.1:2181
+
+# Producer data to topic
+# It will create a topic if it is not there and add data to it.
+kafka-console-producer --broker-list 127.0.0.1:9092 --topic first_topic
+
+# Consumes data
+# bootstrap-server: Remember if you connect to one server the we will connected entire kafka cluster. This helps to acheive it.
+# By default consumer tries to read messages from tail. So this will not show existing messages.
+kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --topic first_topic
+
+# Now kafka consumer reads from the start
+kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --topic first_topic --from-beginning
+
+# We can specifiy from which partition to read messages as well.
+kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --topic first_topic --from-beginning --partition 1
+
+# If you run this command 'n' you will be seeing all messages. But in theory we cannot see the messages we have consumed.
+# The reason is we haven't specified the group id of the consumer. Iff you specify the group id kafka will commit the offset.
+# To do that we have pass --consumer-property
+# Now kafka consumer reads from the start
+kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --topic first_topic --from-beginning --consumer-property group.id=mygroup1
+
+# Now even if you specify it will not all show messages.
