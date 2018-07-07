@@ -2,7 +2,7 @@ from kafka import KafkaProducer
 
 BROKER_HOST = '127.0.0.1'
 PORT = 9092
-TOPIC = 'test'
+TOPIC = 'test_topic'
 
 
 class Producer(object):
@@ -21,12 +21,6 @@ class Producer(object):
         self.bootstrap_server = "%s:%s" % (broker_host, port)
 
     def run(self, topic_name):
-        data = [
-            "Hi",
-            "Hello",
-            "How are you?",
-            "Where are you"
-        ]
 
         producer = KafkaProducer(
             bootstrap_servers=self.bootstrap_server,
@@ -37,11 +31,9 @@ class Producer(object):
             value_serializer=str.encode
         )
 
-        key = 1
-        for each in data:
+        for key in range(10):
             # Since we specified 'key' here value will be written in that key.
-            print producer.send(topic_name, key=str(key), value=each)
-            key += 1
+            producer.send(topic_name, key=str(key), value="message sent %s" % key)
 
         producer.close()
 
