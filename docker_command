@@ -31,5 +31,22 @@ kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --topic first_topic --f
 # To do that we have pass --consumer-property
 # Now kafka consumer reads from the start
 kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --topic first_topic --from-beginning --consumer-property group.id=mygroup1
-
 # Now even if you specify it will not all show messages.
+
+
+# Create topic with appropriate configs for log compaction
+# min.cleanable.dirty.ratio ensures compact very fast. By default 0.5
+# segment.ms every 10 seconds kafka creates new segment.
+kafka-topics --zookeeper 127.0.0.1:2181 --create \
+    --topic empolyee-salary-compact \
+    --partitions 1 --replication-factor 1 \
+    --config cleanup.policy=compact \
+    --config min.cleanable.dirty.ratio=0.005 \
+    --config segment.ms=10000
+
+# Consumer
+kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --topic empolyee-salary-compact --from-beginning --property print.key=true --property key.separator=,
+
+# Producer
+kafka-console-producer --broker-list 127.0.0.1:9092 --topic empolyee-salary-compact --property parse.key=true --property key.separator=,
+
